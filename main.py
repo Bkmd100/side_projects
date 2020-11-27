@@ -1,7 +1,7 @@
 import subprocess  # to use the ping command
 import threading  # to make ip
 import time  # to sleep
-import socket  # to test ips
+import socket  # to get local ip
 
 
 def test_ip(s):  # to test if a string is an ip or no
@@ -20,19 +20,20 @@ def test_ip(s):  # to test if a string is an ip or no
 def pinger(i):  # function to ping an ip, if the ip responds then it will be added to the list
 	global ip_list
 	address = his_ip + str(i)
-	ping = "ping -n 4 -w 2000 " + address
+	command = "ping -n 4 -w 2000 " + address
 
-	res = subprocess.Popen(ping, shell=True, stdout=subprocess.PIPE)
+	res = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 	h = str(res.communicate())
 
-	count = h.count("timed out") + h.count("unreach")
-	if count != 4:  # the ip will get pinged xx times, so if we have less than xx "time outs" and "unreachables" then the ip is up
+	count = h.count("timed out") + h.count("unreachable")
+	if count != 4:  # the ip will get pinged xx times, so if we have less than xx "time outs" and "unreachable" then the ip is up
 
 		ip_list.add(address)
 
 
 def get_ip():
 	global his_ip
+
 	his_ip = socket.gethostbyname(socket.gethostname())  # getting the local ip
 	his_input = ""
 	while not (his_input in ["yes",
@@ -55,7 +56,7 @@ get_ip()
 
 while 1:
 	old_list = ip_list.copy()
-	ip_list = set()  # rempty the set
+	ip_list = set()  # re-empty the set
 	print("starting, please wait..")
 	try:
 		for ping in range(2, 254):  # starting a thread for every ip
@@ -67,8 +68,9 @@ while 1:
 
 
 
-	except:
+	except Exception as e:
 		print("Error: unable to start thread")
+		print(e)
 		exit(-1)
 
 	time.sleep(3)
