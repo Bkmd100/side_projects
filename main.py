@@ -71,16 +71,16 @@ while 1:
     connected = list - old_list
     disconnected = old_list - list
     print(threading.activeCount())
-    if not (first_execution):
+    if not first_execution:
 
-        if (old_list == list):
+        if old_list == list:
             print("no one connected nor disconnected, sleeping for 10 seconds")
             time.sleep(10)
         else:
-            if (len(connected) != 0):
+            if len(connected) != 0:
                 print(connected)
                 print("connected")
-            if (len(disconnected) != 0):
+            if len(disconnected) != 0:
                 print(disconnected)
                 print("disconnected")
 
@@ -89,7 +89,6 @@ while 1:
 
     else:
         first_execution = False
-        print(connected)
-        print("are connected initially")
+        print(str(connected+"are connected initially"))
 
 
