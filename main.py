@@ -2,7 +2,7 @@ import subprocess  # to use the ping command
 import threading  # to make ip
 import time  # to sleep
 import socket  # to get local ip
-
+import os
 
 def test_ip(s):  # to test if a string is an ip or no
 	a = s.split('.')
@@ -61,8 +61,10 @@ while 1:
 	try:
 		for ping in range(2, 254):  # starting a thread for every ip
 			time.sleep(0.01)
-			while threading.activeCount() > 100:
-				time.sleep(1)
+			# while threading.activeCount() > 100:
+			# 	os.system('cls')
+			# 	print(str("please wait " + str(threading.activeCount()) + " threads left..."))
+			# 	time.sleep(1)
 
 			threading.Thread(target=pinger, args=(ping,)).start()
 
@@ -75,6 +77,8 @@ while 1:
 
 	time.sleep(3)
 	while threading.activeCount() > 1:  # waiting for the ping threads to finish
+		os.system('cls')
+		print(str("please wait "+str(threading.activeCount())+" threads left..."))
 		time.sleep(2)
 
 	connected = ip_list - old_list  # list of new connected devices
