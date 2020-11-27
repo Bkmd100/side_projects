@@ -1,10 +1,10 @@
-import subprocess
-import threading
-import time
-import socket
+import subprocess #to use the ping command
+import threading #to make ip
+import time #to sleep
+import socket #to test ips
 
 
-def test_ip(s):
+def test_ip(s): #to test if a string is an ip or no
     a = s.split('.')
     if len(a) != 4:
         return False
@@ -17,42 +17,55 @@ def test_ip(s):
     return True
 
 
-list = set()
-
-his_ip = socket.gethostbyname(socket.gethostname())
-his_input = ""
-while not (his_input in ["yes", "no"]):
-    his_input = input(str("is this your local ip " + his_ip + ": "))
-if his_input == "no":
-    his_ip = ""
-    while not (test_ip(his_ip)):
-        his_ip = input(str("please write down your ip"))
-
-his_ip = his_ip.split(".")
-his_ip = his_ip[0] + "." + his_ip[1] + "." + his_ip[2] + "."
-print(his_ip)
-first_execution = True
 
 
-def pinger(i):
+def pinger(i): #function to ping an ip, if the ip responds then it will be added to the list
     global list
     address = his_ip + str(i)
     ping = "ping -n 4 -w 2000 " + address
-    # print(ping)
+
     res = subprocess.Popen(ping, shell=True, stdout=subprocess.PIPE)
     h = str(res.communicate())
-    # print(h)
+
     count = h.count("timed out") + h.count("unreach")
-    if count != 4:
-        # print( "ping to", address, "OK")
+    if count != 4: #the ip will get pinged xx times, so if we have less than xx "time outs" and "unreachables" then the ip is up
+
         list.add(address)
+
+
+
+def get_ip():
+
+    global his_ip
+    his_ip = socket.gethostbyname(socket.gethostname()) #getting the local ip
+    his_input = ""
+    while not (his_input in ["yes", "no"]): #testing if the ip is correct because sometimes the laptop may have multiple local ips
+        his_input = input(str("is this your local ip " + his_ip + ": "))
+    if his_input == "no": #getting the correct ip
+        his_ip = ""
+        while not (test_ip(his_ip)):
+            his_ip = input(str("please write down your ip"))
+
+    his_ip = his_ip.split(".")
+    his_ip = his_ip[0] + "." + his_ip[1] + "." + his_ip[2] + "." #converting ip from like this 192.168.1.5 to like this 192.168.1. (remove the 5 in the end)
+
+
+
+first_execution = True
+his_ip=""
+list = set() #this will contain the connected ips
+get_ip()
+
+
+
 
 
 while 1:
     old_list = list.copy()
     list = set()  # rempty the set
+    print("starting, please wait..")
     try:
-        for ping in range(2, 254):
+        for ping in range(2, 254): #starting a thread for every ip
             time.sleep(0.01)
             while threading.activeCount() > 100:
                 time.sleep(1)
@@ -63,19 +76,25 @@ while 1:
 
     except:
         print("Error: unable to start thread")
+        exit(-1)
 
     time.sleep(3)
-    while threading.activeCount() > 1:
+    while threading.activeCount() > 1: #waiting for the ping threads to finish
         time.sleep(2)
 
-    connected = list - old_list
-    disconnected = old_list - list
-    print(threading.activeCount())
-    if not first_execution:
+    connected = list - old_list #list of new connected devices
+    disconnected = old_list - list #list of disconnected devices
+
+    if  first_execution:
+        first_execution = False
+        print(str(str(connected) + "are connected initially"))
+
+
+    else:
 
         if old_list == list:
-            print("no one connected nor disconnected, sleeping for 10 seconds")
-            time.sleep(10)
+            print("no one connected nor disconnected")
+
         else:
             if len(connected) != 0:
                 print(connected)
@@ -83,12 +102,6 @@ while 1:
             if len(disconnected) != 0:
                 print(disconnected)
                 print("disconnected")
-
-
-
-
-    else:
-        first_execution = False
-        print(str(connected+"are connected initially"))
-
+    print("sleeping for 10 seconds")
+    time.sleep(10)
 
